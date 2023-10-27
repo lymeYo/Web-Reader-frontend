@@ -1,0 +1,49 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.header img {
+  width: 20px;
+  object-fit: contain;
+}
+.header-row {
+  display: flex;
+  gap: 7px;
+  font-size: 12px;
+}
+.header-row h3 {
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.header-row h3.active {
+  text-decoration: underline;
+}
+.header-row h3:hover {
+  text-decoration: underline;
+}
+.list {
+  margin-top: 20px;
+  overflow-y: scroll;
+  height: 100%;
+  list-style-type: circle;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.list li {
+  cursor: pointer;
+}
+.list.books-list {
+  margin-top: 25px;
+  gap: 10px;
+}
+.toc-item {
+  text-decoration: underline;
+}
+.toc-item::before {
+  content: '-';
+}
+
+.books-item.active, .books-item:hover {
+  color: rgb(144, 144, 144);
+}

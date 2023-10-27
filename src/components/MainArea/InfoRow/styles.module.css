@@ -1,0 +1,66 @@
+.row {
+  position: fixed;
+  padding: 0 10px;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  border-top: 1px solid #8D8778;
+  color: #8D8778;
+}
+
+.book-info {
+  display: flex;
+}
+
+.book-name {
+  margin-right: 10px;
+  font-size: 14px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.battery-image {
+  width: 24px;
+  transform: rotate(90deg);
+}
+
+.go-back {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+.go-back.none {
+  display: none;
+}
+
+.back-img {
+  width: 10px;
+  margin-right: 2px;
+  transform: translate(0, 2px);
+  transition: transform .25s;
+}
+
+.go-back:hover .back-img {
+  transform: translate(1px, 2px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .row {
+    filter: invert(1);
+  }
+}
+
+[data-theme="dark"] .row {
+  filter: invert(1);
+}
+
+[data-theme="light"] .row {
+  filter: none;
+}
