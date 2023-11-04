@@ -1,5 +1,5 @@
 import ArrowLeftImg from '@/assets/images/arrow-left.png'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import InfoPanel from './InfoPanel'
 import CopyAllowStatus from './CopyAllowStatus'
@@ -7,17 +7,28 @@ import ThemeToggle from './ThemeToggle'
 import Account from './Account'
 import { EpanelIds } from './constants'
 import DropBook from './DropBook'
+import FullscreenMode from './FullscreenMode'
+import ConfirmWindow from './ConfirmWindow'
+import type { TshowConfirmPanel } from './InfoPanel/constants'
 
 import styles from './styles.module.css'
+import { getUIStore } from '@/store'
 
 interface NavBarProps {
   isOpen: boolean
   handleOpen: (isOpen?: boolean) => void
 }
 
+type TconfirmWindowData = {
+  callback: () => void
+  message: string
+}
+
 const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
-  const [curOpenedPanel, setCurOpenedPanel] = useState<EpanelIds | null>(EpanelIds.infoPanel)
+  const { isAnyInputActive } = getUIStore()
+  const [curOpenedPanel, setCurOpenedPanel] = useState<EpanelIds | null>(null)
   const [isTogglerVisible, setIsTogglerVisible] = useState<boolean>(true)
+  const [confirmWindowData, setConfirmWindowData] = useState<TconfirmWindowData>()
   const lastIndicatorActiveRef = useRef<number>(0)
   const isNavBarOpenRef = useRef<boolean>(isOpen)
   useMemo(() => (isNavBarOpenRef.current = isOpen), [isOpen])
@@ -38,8 +49,13 @@ const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
     handlePanel(EpanelIds.account, isPanelOpen)
   }
 
-  const showDropPanel = (isPanelOpen?: boolean) => {
-    handlePanel(EpanelIds.dropBook, isPanelOpen)
+  const showConfirmPanel: TshowConfirmPanel = (isPanelOpen, callback, message) => {
+    if (callback && message)
+      setConfirmWindowData({
+        callback,
+        message
+      })
+    handlePanel(EpanelIds.confirmWindow, isPanelOpen)
   }
 
   const handlePanel = useCallback(
@@ -68,16 +84,24 @@ const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
 
     const clickHandler = (event: any) => {
       const isNavBarClick = Boolean(event.target.closest('.' + styles.navbar))
-
       if (!isNavBarClick) handleOpen(false)
     }
+    const keydownHandler = (event: KeyboardEvent) => {
+      if ((event.code == 'ArrowLeft' || event.code == 'ArrowRight') && !isAnyInputActive())
+        handleOpen(false)
+    }
+
     document.addEventListener('click', clickHandler)
-    return () => document.removeEventListener('click', clickHandler)
+    document.addEventListener('keydown', keydownHandler)
+    return () => {
+      document.removeEventListener('click', clickHandler)
+      document.removeEventListener('keydown', keydownHandler)
+    }
   }, [])
 
   return (
     <div className={`${styles.navbar} ${isOpen ? '' : styles.close}`}>
-      <div
+      <button
         className={`${styles.toggler} ${isOpen ? '' : styles.close} ${
           isTogglerVisible ? '' : styles.unvisible
         }`}
@@ -85,11 +109,29 @@ const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
         onMouseOver={handleIndicatorHover}
       >
         <img src={ArrowLeftImg.src} alt='' />
-      </div>
+      </button>
       <div className={styles.buttons}>
-        <DropBook isOpen={curOpenedPanel == EpanelIds.dropBook} openHandler={showDropPanel} />
-        <InfoPanel isOpen={curOpenedPanel == EpanelIds.infoPanel} openHandler={showInfoPanel} />
+        <DropBook
+          isOpen={curOpenedPanel == EpanelIds.confirmWindow}
+          openConfirmPanel={showConfirmPanel}
+          // openHandler={showConfirmPanel}
+        />
+        {confirmWindowData ? (
+          <ConfirmWindow
+            isOpen={curOpenedPanel == EpanelIds.confirmWindow}
+            openHandler={showConfirmPanel}
+            {...confirmWindowData}
+          />
+        ) : (
+          ''
+        )}
+        <InfoPanel
+          isOpen={curOpenedPanel == EpanelIds.infoPanel}
+          openHandler={showInfoPanel}
+          openConfirmPanel={showConfirmPanel}
+        />
         <CopyAllowStatus />
+        <FullscreenMode />
         <ThemeToggle />
         <Account isOpen={curOpenedPanel == EpanelIds.account} openHandler={showAccountPanel} />
       </div>

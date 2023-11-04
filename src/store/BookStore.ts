@@ -1,12 +1,9 @@
-import { action, computed, makeAutoObservable, makeObservable, observable, runInAction } from 'mobx'
+import { makeAutoObservable } from 'mobx'
 import Cookies from 'js-cookie'
-import { bookRefCookieKey, cfiCookieKey, themeCookieKey, tokenCookieKey } from '@/constants'
-import { isUserResError, type TuserData } from '@/api/user/constants'
-import updateBookData from '@/api/book/updateBookData'
-import loginByToken from '@/api/user/loginByToken'
-import type { Ttheme, Ttoc } from './constants'
+import { bookRefCookieKey, cfiCookieKey, themeCookieKey } from '@/constants'
+import type { TBookData, Ttheme, Ttoc } from './constants'
 import type { ClassRootStore } from '.'
-import dropBookData from '@/api/book/dropBookData'
+import updateUserBook, { type TbookDataForUpdate } from '@/api/user/updateUserBook'
 
 type TbookSize = {
   height: number
@@ -16,6 +13,7 @@ type TbookSize = {
 export class ClassBookStore {
   rootStore: ClassRootStore
   bookRef: string | null = Cookies.get(bookRefCookieKey) || null
+  bookName: string | null = null
   curCfi: string | null = Cookies.get(cfiCookieKey) || null
   lastCfi: string | null = null // на случай если пользователь перешел в аннотации и хочет вернуться на исходную страницу
   lastCfiDate: number = 0 // расчет задержки, при быстром листании не спамило на сервер
@@ -23,10 +21,8 @@ export class ClassBookStore {
     height: 0,
     width: 0
   }
+  bookId: number | null = null
   toc: Ttoc[] | null = null
-  isCopyAllow: boolean = false
-  bookName: string | null = null
-  theme: Ttheme = 'dark'
 
   get isBookRefLoad() {
     return Boolean(this.bookRef)
@@ -39,14 +35,13 @@ export class ClassBookStore {
   constructor(rootStore: ClassRootStore) {
     makeAutoObservable(this)
     this.rootStore = rootStore
-    this.renderTheme()
   }
 
   setBookRef = async (ref: string, bookSize?: TbookSize) => {
     this.bookRef = ref
     if (bookSize) this.bookSize = bookSize
 
-    await updateBookData(ref, null)
+    // await updateBookData(ref, null) //TODO for new api
   }
 
   setToc = (toc: Ttoc[]) => {
@@ -54,13 +49,37 @@ export class ClassBookStore {
   }
 
   // перелистывание страницы
+  private isCfiCanUpdate: boolean = true
+  private isCfiUpdateTimerActive: boolean = false
+  private lastCfiForUpdate: string | null = null
+  private cfiUpdateTimer = (cfi: string) => {
+    this.lastCfiForUpdate = cfi
+    if (this.isCfiUpdateTimerActive) return
+    this.isCfiCanUpdate = false
+    this.isCfiUpdateTimerActive = true
+    setTimeout(() => {
+      this.isCfiCanUpdate = true
+      this.isCfiUpdateTimerActive = false
+      if (this.bookId && this.curCfi && this.curCfi != cfi)
+        this.handleServerCfi(this.curCfi, this.bookId)
+    }, 1000)
+  }
+  private handleServerCfi = (cfi: string, bookId: number) => {
+    if (this.isCfiCanUpdate) {
+      const dataForUpdate: TbookDataForUpdate = {
+        id: bookId,
+        epubCfi: cfi,
+        bookName: this.bookName
+      }
+      updateUserBook(dataForUpdate) // async
+    }
+    this.cfiUpdateTimer(cfi) // обновлять данные на сервере только раз в секунду
+  }
   setCfi = (cfi: string) => {
-    const date = new Date().getTime()
-    // обновлять данные на сервере только раз в секунду
     this.curCfi = cfi
     Cookies.set(cfiCookieKey, cfi)
-    if (date - this.lastCfiDate > 1000) if (this.bookRef) updateBookData(this.bookRef, cfi) // async
-    this.lastCfiDate = date
+
+    if (this.bookId && this.rootStore.userStore.isLogin) this.handleServerCfi(cfi, this.bookId) // bookId есть только в том случае, если книга открыта у залогиненого пользователя
   }
 
   setLastCfi = (cfi: string) => {
@@ -77,50 +96,29 @@ export class ClassBookStore {
     this.lastCfi = null
   }
 
-  setBookName = (name: string) => {
-    this.bookName = name
-  }
+  setBookData = (book: TBookData) => {
+    if (this.bookRef) this.dropCurBook()
 
-  changeCopyAllow = (isAllow: boolean) => {
-    this.isCopyAllow = isAllow
-  }
-
-  setTheme = (curTheme?: Ttheme) => {
-    const theme = curTheme ? curTheme : this.theme == 'light' ? 'dark' : 'light'
-    this.theme = theme
-    document.body.setAttribute('data-theme', theme)
-  }
-
-  setBookInfo = (bookRef: string | null, curCfi: string | null) => {
+    const { bookRef, bookName, epubCfi, id } = book
     this.bookRef = bookRef
-    if (curCfi) this.setCfi(curCfi)
+    this.bookName = bookName
+    this.bookId = id
+    Cookies.set(bookRefCookieKey, bookRef)
+    if (epubCfi) {
+      Cookies.set(cfiCookieKey, epubCfi)
+      this.setCfi(epubCfi)
+    }
   }
 
-  dropBook = async () => {
+  dropCurBook = () => {
     this.bookRef = null
     Cookies.remove(bookRefCookieKey)
     this.curCfi = null
     Cookies.remove(cfiCookieKey)
-
-    const username = this.rootStore.authStore.username
-    const password = this.rootStore.authStore.password
-    if (this.rootStore.authStore.isLogin && username && password) await dropBookData() // удалются данные с сервера
-  }
-
-  private renderTheme = () => {
-    const cookiesTheme = Cookies.get(themeCookieKey)
-    const isCookiesThemeValid = (cookiesTheme: any): cookiesTheme is Ttheme =>
-      cookiesTheme == 'light' || cookiesTheme == 'dark'
-
-    if (isCookiesThemeValid(cookiesTheme)) {
-      this.setTheme(cookiesTheme)
-      return
-    }
-
-    const theme =
-      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-    this.setTheme(theme)
+    this.bookName = null
+    this.bookId = null
+    this.toc = null
+    this.lastCfi = null
+    this.lastCfiForUpdate = null
   }
 }

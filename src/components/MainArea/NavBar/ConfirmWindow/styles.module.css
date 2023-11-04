@@ -1,0 +1,30 @@
+.info-mess {
+  min-width: 310px;
+  width: 100%;
+  right: -360px;
+  height: max-content;
+  font-size: 14px;
+}
+.info-mess.hide {
+  display: none;
+}
+.message {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: end;
+  gap: 15px;
+}
+
+.buttons button {
+  font-size: 16px;
+  color: #fff;
+}
+
+.buttons button:hover {
+  color: #c7c7c7;
+}

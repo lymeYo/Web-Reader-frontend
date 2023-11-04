@@ -1,7 +1,7 @@
 import ExitImg from '@/assets/images/account/exit.png'
 import ProfileImg from '@/assets/images/account/profile.png'
 import { observer } from 'mobx-react-lite'
-import { getAuthStore, getBookStore } from '@/store'
+import { getUserStore, getBookStore } from '@/store'
 import Button from '../Button'
 import ShowLogin from './ShowLogin'
 import ShowLogout from './ShowLogout'
@@ -14,7 +14,7 @@ interface AccountProps {
 }
 
 const Account = observer(({ isOpen, openHandler }: AccountProps) => {
-  const { isLogin } = getAuthStore()
+  const { isLogin } = getUserStore()
   const closePanel = () => openHandler(false)
 
   return (

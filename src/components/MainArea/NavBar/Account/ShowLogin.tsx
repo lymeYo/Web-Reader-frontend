@@ -1,6 +1,6 @@
 import type { TuserData, TuserErrorData } from '@/api/user/constants'
 import SendImg from '@/assets/images/send-2.png'
-import { getAuthStore, getBookStore } from '@/store'
+import { getUserStore, getBookStore } from '@/store'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useRef, useState } from 'react'
 
@@ -19,7 +19,7 @@ const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
   const passwordInputRef = useRef<HTMLInputElement>(null)
   const [authType, setAuthType] = useState<TauthType>('login')
   const [errMessage, setErrMessage] = useState<string>('')
-  const { login, registration } = getAuthStore()
+  const { login, registration } = getUserStore()
 
   const setLoginType = () => {
     setAuthType('login')
@@ -38,14 +38,15 @@ const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
     if (authType == 'login') userData = await login(name, password)
     else userData = await registration(name, password)
 
+    if (nameInputRef.current) nameInputRef.current.value = ''
+    if (passwordInputRef.current) passwordInputRef.current.value = ''
+
     if (isDataError(userData)) {
       setErrMessage(userData.errMessage)
     } else {
       setErrMessage('')
+      closePanel()
     }
-    if (nameInputRef.current) nameInputRef.current.value = ''
-    if (passwordInputRef.current) passwordInputRef.current.value = ''
-    closePanel()
   }, [authType])
 
   return (
@@ -54,12 +55,20 @@ const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
       <input type='text' placeholder='Пароль' ref={passwordInputRef} />
       <div className={styles.options}>
         <div className={styles.toggler}>
-          <span onClick={setLoginType} className={authType == 'login' ? styles.active : ''}>
+          <button
+            onClick={setLoginType}
+            className={authType == 'login' ? styles.active : ''}
+            type='button'
+          >
             Вход
-          </span>
-          <span onClick={setRegisterType} className={authType == 'register' ? styles.active : ''}>
+          </button>
+          <button
+            onClick={setRegisterType}
+            className={authType == 'register' ? styles.active : ''}
+            type='button'
+          >
             Регистрация
-          </span>
+          </button>
         </div>
         <button onClick={handleAuth} type='button' className={styles['send-btn']}>
           <img src={SendImg.src} alt='' />

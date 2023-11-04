@@ -2,7 +2,7 @@ import { useState } from 'react'
 import BookArea from './BookArea'
 import FileArea from './FileArea'
 import { observer } from 'mobx-react-lite'
-import { getBookStore } from '@/store'
+import { getBookStore, getUserStore } from '@/store'
 import NavBar from './NavBar'
 import InfoRow from './InfoRow'
 

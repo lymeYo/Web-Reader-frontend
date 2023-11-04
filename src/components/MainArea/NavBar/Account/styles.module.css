@@ -31,20 +31,17 @@
   justify-content: space-between;
   align-items: center;
 }
-.toggler {
+.toggler button {
   color: rgb(234, 234, 234);
   font-size: 12px;
 }
-.toggler span {
-  cursor: pointer;
-}
-.toggler span:nth-child(1) {
+.toggler button:nth-child(1) {
   margin-right: 5px;
 }
-.toggler span.active {
+.toggler button.active {
   text-decoration: underline;
 }
-.toggler span:hover {
+.toggler button:hover {
   color: rgb(204, 204, 204);
 }
 .send-btn {

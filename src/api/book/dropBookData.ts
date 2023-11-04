@@ -1,9 +1,9 @@
-import { getAuthStore } from '@/store'
+import { getUserStore } from '@/store'
 import authentication from '../user/authentication'
 import { isTokenResError } from '../user/constants'
 
 const dropBook = async (): Promise<void> => {
-  const { username, password } = getAuthStore()
+  const { username, password } = getUserStore()
   if (!username || !password) return
 
   try {

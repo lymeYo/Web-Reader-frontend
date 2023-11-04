@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
-import Epub, { Rendition } from 'epubjs'
+import Epub, { Book, Rendition } from 'epubjs'
 import { observer } from 'mobx-react-lite'
-import { getBookStore } from '@/store'
+import { getBookStore, getUIStore } from '@/store'
 import type Navigation from 'epubjs/types/navigation'
 
 import styles from './styles.module.css'
@@ -11,9 +11,12 @@ interface BookAreaProps {
 }
 
 const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
-  const { bookRef, setToc, curCfi, isCopyAllow, setBookName, theme, setCfi } = getBookStore()
+  const { bookRef, setToc, curCfi, setCfi } = getBookStore()
+  const { isCopyAllow, theme, isAnyInputActive } = getUIStore()
 
   const renditionReactRef = useRef<Rendition>()
+  const bookReactRef = useRef<Book>()
+  const bookAreaElRef = useRef<HTMLDivElement>(null)
   const isCopyAllowRef = useRef<boolean>(isCopyAllow)
   const lastCfiOperationRef = useRef<'jump' | 'step'>(null) // step - перелистывание страницы, jump - переход с оглавления
 
@@ -23,19 +26,19 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
 
   //создание и отображение книги и rendition
   useEffect(() => {
-    if (!bookRef) return
+    if (bookAreaElRef.current?.innerHTML) bookAreaElRef.current.innerHTML = ''
+    if (!bookRef || !bookAreaElRef.current) return
 
     const book = Epub(bookRef)
-    renditionReactRef.current = book.renderTo('book-area', {
+    bookReactRef.current = book
+
+    renditionReactRef.current = book.renderTo(bookAreaElRef.current.id, {
       flow: 'paginated'
     })
     renditionReactRef.current.display(curCfi || undefined)
 
     book.loaded.navigation.then((nav: Navigation) => {
       console.log(nav)
-      const bookName = nav.toc[0].label
-      setBookName(bookName)
-
       setToc(
         nav.toc.map((toc) => ({
           title: toc.label,
@@ -65,6 +68,7 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
     }
 
     const handleDocumentKey = (event: KeyboardEvent) => {
+      if (isAnyInputActive()) return
       if (event.code == 'ArrowLeft') changePage('prev')
       if (event.code == 'ArrowRight') changePage('next')
     }
@@ -127,13 +131,14 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
     return () => {
       document.removeEventListener('keydown', handleDocumentKey)
     }
-  }, [])
+  }, [bookRef])
 
   useEffect(() => {
     const rendition = renditionReactRef.current
-    if (!rendition) return
-
+    const book = bookReactRef.current
+    if (!rendition || !book) return
     theme == 'dark' ? rendition.themes.select('dark') : rendition.themes.select('light')
+    // rendition.start()
   }, [theme])
 
   useEffect(() => {
@@ -149,8 +154,8 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
       if (!isCfiDisplayedAlready && curCfi) rendition.display(curCfi)
     }
     handleDisplay()
-  }, [curCfi])
+  }, [bookRef, curCfi])
 
-  return <div id='book-area'></div>
+  return <div id='book-area' ref={bookAreaElRef}></div>
 })
 export default BookArea

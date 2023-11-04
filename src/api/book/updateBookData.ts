@@ -1,4 +1,4 @@
-import { getAuthStore, getBookStore } from '@/store'
+import { getUserStore, getBookStore } from '@/store'
 import authentication from '../user/authentication'
 import { getErrorMessage, isTokenResError } from '../user/constants'
 
@@ -7,7 +7,7 @@ const updateBookData = async (bookRef: string, epubCfi: string | null): Promise<
     bookRef,
     epubCfi
   }
-  const { username, password } = getAuthStore()
+  const { username, password } = getUserStore()
   if (!username || !password) return
 
   try {

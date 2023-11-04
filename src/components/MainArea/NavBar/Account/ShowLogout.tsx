@@ -1,12 +1,12 @@
 import { observer } from 'mobx-react-lite'
 import styles from './styles.module.css'
-import { getAuthStore } from '@/store'
+import { getUserStore } from '@/store'
 
 type ShowLogoutProps = {
   isOpen: boolean
 }
 const ShowLogout = observer(({ isOpen }: ShowLogoutProps) => {
-  const { logout } = getAuthStore()
+  const { logout } = getUserStore()
   const handleExit = () => logout()
 
   return (

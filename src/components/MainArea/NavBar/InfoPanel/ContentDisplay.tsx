@@ -1,44 +1,58 @@
-import { getBookStore } from '@/store'
+import { getBookStore, getUserStore } from '@/store'
+import type { TdisplayMode } from './constants'
 import { observer } from 'mobx-react-lite'
 import BooksItem from './BooksItem'
 import TocItem from './TocItem'
 
 import styles from './styles.module.css'
-import type { TdisplayMode } from './constants'
 
 type ContentDisplayProps = {
   mode: TdisplayMode
+  closePanelHandler: () => void
+  handleBookDelete: (bookId: number, bookName: string) => void
 }
-const ContentDisplay = observer(({ mode }: ContentDisplayProps) => {
-  if (mode == 'toc') return <TocContent />
-  if (mode == 'books') return <BooksContent />
-})
+const ContentDisplay = observer(
+  ({ mode, closePanelHandler, handleBookDelete }: ContentDisplayProps) => {
+    if (mode == 'toc') return <TocContent clickHandler={closePanelHandler} />
+    if (mode == 'books')
+      return <BooksContent closeHandler={closePanelHandler} handleBookDelete={handleBookDelete} />
+  }
+)
 
-const TocContent = observer(() => {
+type TocContentProps = {
+  clickHandler: () => void
+}
+
+const TocContent = observer(({ clickHandler }: TocContentProps) => {
   const { toc } = getBookStore()
 
   return (
     <ul className={styles.list}>
       {toc?.map((item) => (
-        <TocItem href={item.href} title={item.title} key={item.href} closeNavBar={close} />
+        <TocItem key={item.href} href={item.href} title={item.title} onClick={clickHandler} />
       ))}
     </ul>
   )
 })
 
-const BooksContent = observer(() => {
-  const testList = [
-    'Начало Бесконечности. Дэвид Дойч',
-    'Зачем мы спим? Мэтью Уолкер',
-    'Мастер и Маргарита. Михаил Булгаков',
-    'Каспар, Мельхиор и Бальтазар. Мишель Турнье',
-    'Отверженные. Виктор Гюго Очень длинное название',
-    'Отверженные. Виктор Гюго'
-  ]
+type BooksContentProps = {
+  closeHandler: () => void
+  handleBookDelete: (bookId: number, bookName: string) => void
+}
+
+const BooksContent = observer(({ closeHandler, handleBookDelete }: BooksContentProps) => {
+  const { userBooks } = getUserStore()
   return (
     <ul className={`${styles.list} ${styles['books-list']}`}>
-      {testList.map((item, ind) => (
-        <BooksItem key={ind} item={item} ind={ind} />
+      {userBooks.map((item, ind) => (
+        <BooksItem
+          key={ind}
+          title={item.bookName ?? '<Без названия>'}
+          bookId={item.id}
+          ind={ind}
+          handleDelete={handleBookDelete}
+          closeHandler={closeHandler}
+        />
       ))}
     </ul>
   )

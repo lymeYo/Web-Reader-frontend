@@ -6,11 +6,10 @@ export const getErrorMessage = (status: number) => {
 }
 
 export type TuserData = {
-  bookRef: string | null
-  epubCfi: string | null
   id: number
   password: string
   username: string
+  openedBookId: number | null
 }
 
 export type TuserErrorData = {

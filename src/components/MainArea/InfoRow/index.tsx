@@ -13,7 +13,8 @@ import { observer } from 'mobx-react-lite'
 const InfoRow = observer(() => {
   const [batteryLvl, setBatteryLvl] = useState<number | null>(null)
   const bookNameElRef = useRef<HTMLSpanElement>(null)
-  const { bookName, handleCfiGoBack, isPageJumped } = getBookStore()
+  const { toc, handleCfiGoBack, isPageJumped } = getBookStore()
+  const bookTitle = toc ? toc[0].title : ''
 
   useEffect(() => {
     (navigator as any).getBattery()?.then((battery: any) => {
@@ -49,7 +50,7 @@ const InfoRow = observer(() => {
           <span>назад</span>
         </div>
         <span className={styles['book-name']} ref={bookNameElRef}>
-          {bookName}
+          {bookTitle}
         </span>
       </div>
       <img src={batteryImageSrc} alt='' className={styles['battery-image']} />

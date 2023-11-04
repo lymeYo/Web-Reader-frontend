@@ -2,18 +2,20 @@ import { useRef, type ChangeEvent } from 'react'
 import { observer } from 'mobx-react-lite'
 import AddFileImg from '@/assets/images/add.png'
 import SendImg from '@/assets/images/send.png'
-import { getBookStore } from '@/store'
+import { getBookStore, getUserStore } from '@/store'
 import getBookRefByFile from '@/api/book/getBookRefByFile'
 import Cookies from 'js-cookie'
 
 import styles from './styles.module.css'
 import { bookRefCookieKey } from '@/constants'
+import type { TbookInfo } from '@/api/book/constants'
 
 interface FileAreaProps {
   // handleBookLoad: (isLoad: boolean) => void
 }
 
 const FileArea = observer(() => {
+  const { isLogin, addBook } = getUserStore()
   const { setBookRef } = getBookStore()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -29,25 +31,25 @@ const FileArea = observer(() => {
     const blob = await res.blob()
     const bookFile = new File([blob], `book.${fileExt}`, { type: blob.type })
 
-    const bookRef = await getBookRefByFile(bookFile)
-    handleBookRef(bookRef)
+    const bookInfo = await getBookRefByFile(bookFile)
+    if (bookInfo) handleBookRef(bookInfo)
   }
 
   const fileHandler = async () => {
     const objectFiles = fileInputRef.current?.files
     if (!objectFiles) return
 
-    const bookRef = await getBookRefByFile(objectFiles[0])
-    handleBookRef(bookRef)
+    const bookInfo = await getBookRefByFile(objectFiles[0])
+    if (bookInfo) handleBookRef(bookInfo)
   }
 
-  const handleBookRef = (ref: string) => {
-    const bookSize = {
-      height: window.screen.availHeight - window.screen.availHeight * 0.2,
-      width: window.screen.availWidth - window.screen.availWidth * 0.2
+  const handleBookRef = ({ bookRef, bookName }: TbookInfo) => {
+    if (isLogin) {
+      addBook(bookRef)
+    } else {
+      setBookRef(bookRef)
+      Cookies.set(bookRefCookieKey, bookRef)
     }
-    setBookRef(ref, bookSize)
-    Cookies.set(bookRefCookieKey, ref)
   }
 
   const imitateFileInputClick = () => {

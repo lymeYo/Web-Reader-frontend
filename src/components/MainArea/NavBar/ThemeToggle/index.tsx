@@ -1,6 +1,6 @@
 import SunIcon from '@/assets/images/theme/sun.png'
 import MoonIcon from '@/assets/images/theme/moon.png'
-import { getBookStore } from '@/store'
+import { getBookStore, getUIStore } from '@/store'
 import type { Ttheme } from '@/store/constants'
 import { observer } from 'mobx-react-lite'
 import Button from '../Button'
@@ -9,7 +9,7 @@ import { themeCookieKey } from '@/constants'
 import { useCallback } from 'react'
 
 const ThemeToggle = observer(() => {
-  const { theme, setTheme } = getBookStore()
+  const { theme, setTheme } = getUIStore()
 
   const handleClick = useCallback(() => {
     const newTheme: Ttheme = theme == 'light' ? 'dark' : 'light'

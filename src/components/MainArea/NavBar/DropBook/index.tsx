@@ -1,43 +1,25 @@
 import BackIcon from '@/assets/images/arrow-left2-dark.png'
 import Button from '../Button'
-import { getBookStore } from '@/store'
-
-import styles from './styles.module.css'
-import parentStyles from '../styles.module.css'
-import { useState } from 'react'
 import { observer } from 'mobx-react-lite'
+import type { TshowConfirmPanel } from '../InfoPanel/constants'
+import { getBookStore, getUserStore } from '@/store'
 
 type DropBookProps = {
   isOpen: boolean
-  openHandler: () => void
+  openConfirmPanel: TshowConfirmPanel
 }
 
-const DropBook = observer(({ isOpen, openHandler }: DropBookProps) => {
-  const { dropBook } = getBookStore()
-
-  const handleDropBook = () => {
-    dropBook()
-    openHandler()
-  }
+const DropBook = observer(({ isOpen, openConfirmPanel }: DropBookProps) => {
+  const { bookId, dropCurBook } = getBookStore() //TODO
+  const { dropBook, isLogin } = getUserStore()
 
   const handleClick = () => {
-    openHandler()
+    const handleDropBook = () => {
+      if (isLogin && bookId) dropBook(bookId)
+      else dropCurBook()
+    }
+    openConfirmPanel(true, handleDropBook, 'Вы хотите закрыть книгу?')
   }
-  return (
-    <>
-      <Button url={BackIcon.src} onClick={handleClick} />
-      <div
-        className={`${styles['info-mess']} ${parentStyles['info-panel']} ${
-          isOpen ? '' : styles.hide
-        }`}
-      >
-        <p>Вы хотите закрыть книгу?</p>
-        <div className={styles.buttons}>
-          <button onClick={handleClick}>Нет</button>
-          <button onClick={handleDropBook}>Да</button>
-        </div>
-      </div>
-    </>
-  )
+  return <Button url={BackIcon.src} onClick={handleClick} />
 })
 export default DropBook

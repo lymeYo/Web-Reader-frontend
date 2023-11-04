@@ -29,9 +29,13 @@ const Button = ({
 
   const activeStatus = activeController ? activeController : isActive
   return (
-    <div className={`${styles.button} ${activeStatus ? styles.active : ''}`} onClick={handleClick}>
+    <button
+      className={`${styles.button} ${activeStatus ? styles.active : ''}`}
+      onClick={handleClick}
+      tabIndex={0}
+    >
       <img src={activeStatus ? activeUrl : url} alt='' />
-    </div>
+    </button>
   )
 }
 export default Button

@@ -7,22 +7,31 @@ import type { TdisplayMode } from './constants'
 type HeadersProps = {
   mode: TdisplayMode
   setMode: (mode: TdisplayMode) => void
+  close: () => void
 }
-const Headers = observer(({ mode, setMode }: HeadersProps) => {
+const Headers = observer(({ mode, setMode, close }: HeadersProps) => {
   const handleTocClick = () => setMode('toc')
   const handleBooksClick = () => setMode('books')
 
   return (
     <div className={styles.header}>
       <div className={styles['header-row']}>
-        <h3 onClick={handleTocClick} className={mode == 'toc' ? styles.active : ''}>
-          оглавление
-        </h3>
-        <h3 onClick={handleBooksClick} className={mode == 'books' ? styles.active : ''}>
-          мои книги
-        </h3>
+        <button
+          onClick={handleTocClick}
+          className={mode == 'toc' ? styles.active : ''}
+          tabIndex={0}
+        >
+          <h3>оглавление</h3>
+        </button>
+        <button
+          className={mode == 'books' ? styles.active : ''}
+          onClick={handleBooksClick}
+          tabIndex={0}
+        >
+          <h3>мои книги</h3>
+        </button>
       </div>
-      <button onClick={close}>
+      <button tabIndex={0} onClick={close}>
         <img src={CloseImg.src} alt='close' />
       </button>
     </div>

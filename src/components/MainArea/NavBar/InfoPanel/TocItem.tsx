@@ -6,20 +6,22 @@ import styles from './styles.module.css'
 type TocItemProps = {
   title: string
   href: string
-  closeNavBar: () => void
+  onClick: () => void
 }
 
-const TocItem = observer(({ title, href, closeNavBar }: TocItemProps) => {
+const TocItem = observer(({ title, href, onClick }: TocItemProps) => {
   const { handleCfiJump } = getBookStore()
 
   const clickHandler = () => {
     handleCfiJump(href)
-    closeNavBar()
+    onClick()
   }
 
   return (
-    <li key={href} className={styles['toc-itemw']} onClick={clickHandler}>
-      {title}
+    <li>
+      <button className={styles['toc-item']} onClick={clickHandler}>
+        {title}
+      </button>
     </li>
   )
 })
