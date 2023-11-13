@@ -31,6 +31,9 @@ const TocContent = observer(({ clickHandler }: TocContentProps) => {
       {toc?.map((item) => (
         <TocItem key={item.href} href={item.href} title={item.title} onClick={clickHandler} />
       ))}
+      {toc?.map((item) => (
+        <TocItem key={item.href + 'q'} href={item.href} title={item.title} onClick={clickHandler} />
+      ))}
     </ul>
   )
 })

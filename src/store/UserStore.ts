@@ -2,7 +2,6 @@ import { makeAutoObservable } from 'mobx'
 import type { ClassRootStore } from '.'
 import login from '@/api/user/login'
 import { isUserResError, type TuserData } from '@/api/user/constants'
-import updateBookData from '@/api/book/updateBookData'
 import { bookRefCookieKey, cfiCookieKey, tokenCookieKey } from '@/constants'
 import Cookies from 'js-cookie'
 import loginByToken from '@/api/user/loginByToken'
@@ -13,6 +12,9 @@ import addUserBook from '@/api/user/addUserBook'
 import getBookNameByRef from '@/api/book/getBookNameByRef'
 import openUserBook from '@/api/user/openUserBook'
 import dropUserBook from '@/api/user/dropUserBook'
+import closeUserBook from '@/api/user/closeUserBook'
+import type { TbookDataForUpdate } from '@/api/user/updateUserBook'
+import updateUserBook from '@/api/user/updateUserBook'
 
 export class ClassUserStore {
   rootStore: ClassRootStore
@@ -75,6 +77,23 @@ export class ClassUserStore {
     }
   }
 
+  closeBook = async () => {
+    this.openedBookId = null
+    this.rootStore.bookStore.dropCurBook()
+    await closeUserBook()
+  }
+
+  updateBookName = async (bookId: number, bookName: string) => {
+    const book = this.userBooks.find((book) => book.id == bookId)
+    if (!this.isLogin || !book) return
+    const dataForUpdate: TbookDataForUpdate = {
+      id: bookId,
+      epubCfi: book.epubCfi,
+      bookName: bookName
+    }
+    updateUserBook(dataForUpdate)
+  }
+
   private initialLogin = async () => {
     const token = Cookies.get(tokenCookieKey)
     if (token) {
@@ -90,6 +109,7 @@ export class ClassUserStore {
     this.userBooks = (await getUserBooks(this.username, this.password)) ?? []
 
     const openedBookId = userData.openedBookId
+    this.openedBookId = openedBookId
     if (openedBookId) {
       const openedBook = this.userBooks.find((book) => book.id == openedBookId)
       if (openedBook) {
@@ -98,13 +118,5 @@ export class ClassUserStore {
         if (openedBook.epubCfi) Cookies.set(cfiCookieKey, openedBook.epubCfi)
       }
     }
-
-    // else {
-    // const storeBookRef = this.rootStore.bookStore.bookRef
-    // const storeBookName = this.rootStore.bookStore.bookName
-    // const storeCfi = this.rootStore.bookStore.curCfi
-    // книга на сервере заменяется той, которую пользователь выбрал до входа
-    // if (storeBookRef) await updateBookData(storeBookRef, storeBookName, storeCfi) //TODO добавлять существующую
-    // }
   }
 }

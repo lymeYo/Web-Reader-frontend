@@ -1,18 +1,19 @@
 import ArrowLeftImg from '@/assets/images/arrow-left.png'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
-import InfoPanel from './InfoPanel'
+import InfoPanel from './Info/InfoPanel'
 import CopyAllowStatus from './CopyAllowStatus'
 import ThemeToggle from './ThemeToggle'
 import Account from './Account'
-import { EpanelIds } from './constants'
+import { EpanelIds, navbarId } from './constants'
 import DropBook from './DropBook'
 import FullscreenMode from './FullscreenMode'
 import ConfirmWindow from './ConfirmWindow'
-import type { TshowConfirmPanel } from './InfoPanel/constants'
 
 import styles from './styles.module.css'
 import { getUIStore } from '@/store'
+import InfoButton from './Info/InfoButton'
+import type { TshowConfirmPanel } from './Info/InfoPanel/constants'
 
 interface NavBarProps {
   isOpen: boolean
@@ -83,7 +84,10 @@ const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
     handleIndicatorHover()
 
     const clickHandler = (event: any) => {
-      const isNavBarClick = Boolean(event.target.closest('.' + styles.navbar))
+      const isNavBarClick = Boolean(
+        event.target.closest('.' + styles.navbar) ||
+          event.target.closest('.' + styles['info-panel'])
+      )
       if (!isNavBarClick) handleOpen(false)
     }
     const keydownHandler = (event: KeyboardEvent) => {
@@ -100,44 +104,46 @@ const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
   }, [])
 
   return (
-    <div className={`${styles.navbar} ${isOpen ? '' : styles.close}`}>
-      <button
-        className={`${styles.toggler} ${isOpen ? '' : styles.close} ${
-          isTogglerVisible ? '' : styles.unvisible
-        }`}
-        onClick={handleTogglerClick}
-        onMouseOver={handleIndicatorHover}
-      >
-        <img src={ArrowLeftImg.src} alt='' />
-      </button>
-      <div className={styles.buttons}>
-        <DropBook
-          isOpen={curOpenedPanel == EpanelIds.confirmWindow}
-          openConfirmPanel={showConfirmPanel}
-          // openHandler={showConfirmPanel}
-        />
-        {confirmWindowData ? (
-          <ConfirmWindow
+    <>
+      <div className={`${styles.navbar} ${isOpen ? '' : styles.close}`} id={navbarId}>
+        <button
+          className={`${styles.toggler} ${isOpen ? '' : styles.close} ${
+            isTogglerVisible ? '' : styles.unvisible
+          }`}
+          onClick={handleTogglerClick}
+          onMouseOver={handleIndicatorHover}
+        >
+          <img src={ArrowLeftImg.src} alt='' />
+        </button>
+        <div className={styles.buttons}>
+          <DropBook
             isOpen={curOpenedPanel == EpanelIds.confirmWindow}
-            openHandler={showConfirmPanel}
-            {...confirmWindowData}
+            openConfirmPanel={showConfirmPanel}
           />
-        ) : (
-          ''
-        )}
-        <InfoPanel
-          isOpen={curOpenedPanel == EpanelIds.infoPanel}
-          openHandler={showInfoPanel}
-          openConfirmPanel={showConfirmPanel}
-        />
-        <CopyAllowStatus />
-        <FullscreenMode />
-        <ThemeToggle />
-        <Account isOpen={curOpenedPanel == EpanelIds.account} openHandler={showAccountPanel} />
+          <InfoButton openHandler={showInfoPanel} />
+          <CopyAllowStatus />
+          <FullscreenMode />
+          <ThemeToggle />
+          <Account isOpen={curOpenedPanel == EpanelIds.account} openHandler={showAccountPanel} />
+        </div>
+        {/* hover-indicator скрывает кнопку открывания NavBar, если пользователь долго не наводил туда курсор */}
+        <div onMouseOver={handleIndicatorHover} className={styles['hover-indicator']}></div>
       </div>
-      {/* hover-indicator скрывает кнопку открывания NavBar, если пользователь долго не наводил туда курсор */}
-      <div onMouseOver={handleIndicatorHover} className={styles['hover-indicator']}></div>
-    </div>
+      <InfoPanel
+        isOpen={curOpenedPanel == EpanelIds.infoPanel}
+        openHandler={showInfoPanel}
+        openConfirmPanel={showConfirmPanel}
+      />
+      {confirmWindowData ? (
+        <ConfirmWindow
+          isOpen={curOpenedPanel == EpanelIds.confirmWindow}
+          openHandler={showConfirmPanel}
+          {...confirmWindowData}
+        />
+      ) : (
+        ''
+      )}
+    </>
   )
 })
 

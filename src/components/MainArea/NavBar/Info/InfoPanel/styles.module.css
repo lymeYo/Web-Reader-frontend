@@ -1,0 +1,68 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.header img {
+  width: 20px;
+  object-fit: contain;
+}
+.header-row {
+  display: flex;
+  margin-right: 8px;
+  gap: 7px;
+  font-size: 12px;
+}
+.header-row h3 {
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.header-row button {
+  color: #fff;
+}
+.header-row button.active {
+  text-decoration: underline;
+}
+.header-row button:hover {
+  text-decoration: underline;
+}
+.list {
+  margin-top: 20px;
+  padding-right: 10px;
+  overflow-y: auto;
+  height: 100%;
+  max-height: 400px;
+  list-style-type: circle;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.list li {
+  cursor: pointer;
+}
+.list button {
+  font-size: 16px;
+  color: #fff;
+}
+.list.books-list {
+  margin-top: 25px;
+  gap: 10px;
+}
+
+.toc-item {
+  width: 100%;
+  text-decoration: underline;
+}
+.toc-item::before {
+  content: '-';
+}
+
+
+@media (max-width: 768px) {
+  .header-row, .header-row h3 {
+    font-size: 12px;
+  }
+  
+  .list button {
+    font-size: 14px;
+  }
+}

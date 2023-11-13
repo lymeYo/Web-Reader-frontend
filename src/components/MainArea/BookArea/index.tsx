@@ -11,14 +11,13 @@ interface BookAreaProps {
 }
 
 const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
-  const { bookRef, setToc, curCfi, setCfi } = getBookStore()
+  const { bookRef, setToc, curCfi, setCfi, setChapterInfo } = getBookStore()
   const { isCopyAllow, theme, isAnyInputActive } = getUIStore()
 
   const renditionReactRef = useRef<Rendition>()
   const bookReactRef = useRef<Book>()
   const bookAreaElRef = useRef<HTMLDivElement>(null)
   const isCopyAllowRef = useRef<boolean>(isCopyAllow)
-  const lastCfiOperationRef = useRef<'jump' | 'step'>(null) // step - перелистывание страницы, jump - переход с оглавления
 
   useMemo(() => {
     isCopyAllowRef.current = isCopyAllow
@@ -45,6 +44,10 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
           href: toc.href
         }))
       )
+    })
+    book.ready.then(() => {
+      // book.locations.generate(3506391).then(console.log)
+      // if (renditionReactRef.current?.currentLocation) console.log(renditionReactRef.current?.currentLocation)
     })
     console.log(book, renditionReactRef.current)
   }, [bookRef])
@@ -86,47 +89,32 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
       i.document.documentElement.addEventListener('click', iframeCLickListener)
     })
 
-    // rendition.on('selected', function (cfiRange: any, contents: any) {
-    //   rendition.annotations.highlight(cfiRange, {}, (e: any) => {
-    //     console.log('highlight clicked', e)
-    //   })
-    //   contents.window.getSelection().removeAllRanges()
-    // })
-
     rendition.themes.default({
       body: {
-        margin: '20px'
-      },
-      '::selection': {
-        background: 'rgba(255,255,0, 0.3)'
-      },
-      '.epubjs-hl': {
-        fill: 'yellow',
-        'fill-opacity': '0.3',
-        'mix-blend-mode': 'multiply'
+        margin: '20px',
+        padding: '20px'
       }
     })
 
     rendition.themes.register('dark', {
-      body: { color: '#bababa', padding: '20px' },
+      body: { color: '#bababa !important' },
       h1: {
+        'background-color': '#333333 !important'
+      },
+      h5: {
         'background-color': '#333333 !important'
       }
     })
 
     rendition.themes.register('light', {
-      body: { color: '#000000', padding: '20px' }
+      body: { color: '#000000 !important' },
+      h1: {
+        'background-color': '#ffffff !important'
+      },
+      h5: {
+        'background-color': '#ffffff !important'
+      }
     })
-    // setInterval(() => {
-    // setTimeout(async () => {
-    //   // rendition.display('epubcfi(/6/20!/4/14/1:0)')
-    //   console.log((rendition.currentLocation() as any).start.cfi)
-    //   await rendition.display('index_split_004.xhtml')
-    //   // rendition.display(10)
-    //   // rendition.next()
-    //   await rendition.reportLocation()
-    //   console.log((rendition.currentLocation() as any).start.cfi)
-    // }, 3000)
 
     return () => {
       document.removeEventListener('keydown', handleDocumentKey)
@@ -138,23 +126,34 @@ const BookArea = observer(({ handleNavBarOpen }: BookAreaProps) => {
     const book = bookReactRef.current
     if (!rendition || !book) return
     theme == 'dark' ? rendition.themes.select('dark') : rendition.themes.select('light')
-    // rendition.start()
   }, [theme])
 
-  useEffect(() => {
+  //установление страниц текущей главы
+  const handleChapterInfo = () => {
     const rendition = renditionReactRef.current
     if (!rendition) return
+    rendition.reportLocation().then(() => {
+      const currentLocation = rendition.currentLocation() as any
+      setChapterInfo(
+        currentLocation.start.displayed.page,
+        currentLocation.end.displayed.page,
+        currentLocation.start.displayed.total
+      )
 
-    const handleDisplay = async () => {
-      await rendition.reportLocation()
       const isCfiDisplayedAlready =
         (rendition.currentLocation() as any).start.cfi == curCfi ||
         (rendition.currentLocation() as any).end.cfi == curCfi
 
       if (!isCfiDisplayedAlready && curCfi) rendition.display(curCfi)
-    }
-    handleDisplay()
-  }, [bookRef, curCfi])
+    })
+  }
+
+  useEffect(handleChapterInfo, [bookRef, curCfi])
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      setTimeout(handleChapterInfo, 3000)
+    })
+  }, [])
 
   return <div id='book-area' ref={bookAreaElRef}></div>
 })

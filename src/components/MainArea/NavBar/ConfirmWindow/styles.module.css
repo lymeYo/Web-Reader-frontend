@@ -1,18 +1,32 @@
-.info-mess {
-  min-width: 310px;
+.wrapper {
+  position: fixed;
+  z-index: 10;
   width: 100%;
-  right: -360px;
+  display: flex;
+  top: 0;
+  justify-content: end;
+  max-width: 500px;
+  padding-right: 10px;
+  box-sizing: border-box;
+}
+.info-mess {
+  width: 70%;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  background-color: var(--second-color);
   height: max-content;
   font-size: 14px;
+  color: #fff;
 }
 .info-mess.hide {
   display: none;
 }
 .message {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .buttons {
   margin-top: 15px;
   display: flex;

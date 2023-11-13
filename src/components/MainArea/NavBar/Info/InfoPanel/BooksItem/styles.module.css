@@ -1,0 +1,44 @@
+.item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.title {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title input {
+ background-color: transparent;
+ color: #fff;
+ cursor: pointer; 
+ width: 100%;
+ max-width: 170px;
+ white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.title input:hover, .item.active input {
+  color: rgb(158, 158, 158);
+}
+.title.edit-mode input {
+  cursor: text;
+}
+.buttons {
+  display: flex;
+}
+.image {
+  margin-left: 5px;
+  width: 20px;
+}
+.wrapper:hover .remove-image {
+  fill: #c94b4b;
+}
+.wrapper:hover .edit-image {
+  fill: #b0c25e;
+}
+.wrapper:hover .done-image {
+  stroke: #46cf86;
+}

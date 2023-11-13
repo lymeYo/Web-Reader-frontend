@@ -11,7 +11,6 @@ const CopyAllowStatus = observer(() => {
     changeCopyAllow(!isCopyAllow)
   }
 
-  // return <div onClick={handleClick}>{isCopyAllow ? 'c' : 'n'}</div>
   return <Button url={CopyImg.src} isVariable activeUrl={CopyActiveImg.src} onClick={handleClick} />
 })
 export default CopyAllowStatus

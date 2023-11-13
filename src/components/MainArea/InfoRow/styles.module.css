@@ -3,6 +3,7 @@
   padding: 0 10px;
   bottom: 0;
   width: 100%;
+  max-width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -13,20 +14,27 @@
 
 .book-info {
   display: flex;
+  width: 100%;
 }
 
 .book-name {
   margin-right: 10px;
   font-size: 14px;
-  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .battery-image {
+  margin-left: auto;
   width: 24px;
   transform: rotate(90deg);
+}
+
+.pages-info {
+  margin: 0 10px 0 5px;
+  text-wrap: nowrap;
+  font-size: 14px;
 }
 
 .go-back {
@@ -50,6 +58,7 @@
 .go-back:hover .back-img {
   transform: translate(1px, 2px);
 }
+
 
 @media (prefers-color-scheme: dark) {
   .row {

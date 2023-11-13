@@ -11,9 +11,9 @@ import { getBookStore } from '@/store'
 import { observer } from 'mobx-react-lite'
 
 const InfoRow = observer(() => {
+  const { toc, handleCfiGoBack, isPageJumped, chapterInfo } = getBookStore()
   const [batteryLvl, setBatteryLvl] = useState<number | null>(null)
-  const bookNameElRef = useRef<HTMLSpanElement>(null)
-  const { toc, handleCfiGoBack, isPageJumped } = getBookStore()
+  const bookNameElRef = useRef<HTMLDivElement>(null)
   const bookTitle = toc ? toc[0].title : ''
 
   useEffect(() => {
@@ -38,6 +38,16 @@ const InfoRow = observer(() => {
     handleCfiGoBack()
   }
 
+  const chapterPageStart = chapterInfo?.curPageStart
+  const chapterPageEnd = chapterInfo?.curPageEnd
+  const chapterTotalPages = chapterInfo?.totalPages
+
+  const chapterPageInfoStr = useMemo(() => {
+    if (!chapterPageStart || !chapterTotalPages) return ''
+    if (chapterPageStart == chapterPageEnd) return `${chapterPageStart} / ${chapterTotalPages}`
+    else return `${chapterPageStart}-${chapterPageEnd} / ${chapterTotalPages}`
+  }, [chapterPageStart, chapterPageEnd, chapterTotalPages])
+
   return (
     <div className={styles.row}>
       {/* TODO */}
@@ -49,11 +59,12 @@ const InfoRow = observer(() => {
           <img className={styles['back-img']} src={ArrowImg.src} alt='arrow' />
           <span>назад</span>
         </div>
-        <span className={styles['book-name']} ref={bookNameElRef}>
+        <div className={styles['book-name']} ref={bookNameElRef}>
           {bookTitle}
-        </span>
+        </div>
+        <div className={styles['pages-info']}>{chapterPageInfoStr}</div>
+        <img src={batteryImageSrc} alt='' className={styles['battery-image']} />
       </div>
-      <img src={batteryImageSrc} alt='' className={styles['battery-image']} />
     </div>
   )
 })

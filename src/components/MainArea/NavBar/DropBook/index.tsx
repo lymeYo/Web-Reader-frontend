@@ -11,11 +11,11 @@ type DropBookProps = {
 
 const DropBook = observer(({ isOpen, openConfirmPanel }: DropBookProps) => {
   const { bookId, dropCurBook } = getBookStore() //TODO
-  const { dropBook, isLogin } = getUserStore()
+  const { isLogin, closeBook } = getUserStore()
 
   const handleClick = () => {
     const handleDropBook = () => {
-      if (isLogin && bookId) dropBook(bookId)
+      if (isLogin && bookId) closeBook()
       else dropCurBook()
     }
     openConfirmPanel(true, handleDropBook, 'Вы хотите закрыть книгу?')

@@ -2,7 +2,7 @@ import type { TuserData, TuserErrorData } from '@/api/user/constants'
 import SendImg from '@/assets/images/send-2.png'
 import { getUserStore, getBookStore } from '@/store'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import styles from './styles.module.css'
 
@@ -17,6 +17,7 @@ type ShowLoginProps = {
 const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
   const nameInputRef = useRef<HTMLInputElement>(null)
   const passwordInputRef = useRef<HTMLInputElement>(null)
+  const isOpenRef = useRef<boolean>(isOpen)
   const [authType, setAuthType] = useState<TauthType>('login')
   const [errMessage, setErrMessage] = useState<string>('')
   const { login, registration } = getUserStore()
@@ -48,6 +49,18 @@ const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
       closePanel()
     }
   }, [authType])
+
+  useMemo(() => {
+    isOpenRef.current = isOpen
+  }, [isOpen])
+
+  useEffect(() => {
+    const keydownHandler = (event: KeyboardEvent) => {
+      if (event.code == 'Enter' && isOpenRef.current) handleAuth()
+    }
+    document.addEventListener('keydown', keydownHandler)
+    return () => document.removeEventListener('keydown', keydownHandler)
+  }, [])
 
   return (
     <form action='' className={`${styles.form} ${isOpen ? '' : styles.close}`}>

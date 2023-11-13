@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx'
 import Cookies from 'js-cookie'
 import { bookRefCookieKey, cfiCookieKey, themeCookieKey } from '@/constants'
-import type { TBookData, Ttheme, Ttoc } from './constants'
+import type { TBookData, TchapterInfo, Ttheme, Ttoc } from './constants'
 import type { ClassRootStore } from '.'
 import updateUserBook, { type TbookDataForUpdate } from '@/api/user/updateUserBook'
 
@@ -23,7 +23,8 @@ export class ClassBookStore {
   }
   bookId: number | null = null
   toc: Ttoc[] | null = null
-
+  chapterInfo: TchapterInfo | null = null
+  
   get isBookRefLoad() {
     return Boolean(this.bookRef)
   }
@@ -40,8 +41,6 @@ export class ClassBookStore {
   setBookRef = async (ref: string, bookSize?: TbookSize) => {
     this.bookRef = ref
     if (bookSize) this.bookSize = bookSize
-
-    // await updateBookData(ref, null) //TODO for new api
   }
 
   setToc = (toc: Ttoc[]) => {
@@ -79,6 +78,8 @@ export class ClassBookStore {
     this.curCfi = cfi
     Cookies.set(cfiCookieKey, cfi)
 
+    const newChapterName = this.toc?.find((title) => title.href == cfi)?.href
+
     if (this.bookId && this.rootStore.userStore.isLogin) this.handleServerCfi(cfi, this.bookId) // bookId есть только в том случае, если книга открыта у залогиненого пользователя
   }
 
@@ -94,6 +95,14 @@ export class ClassBookStore {
   handleCfiGoBack = () => {
     if (this.lastCfi) this.setCfi(this.lastCfi)
     this.lastCfi = null
+  }
+
+  setChapterInfo = (curPageStart: number, curPageEnd: number, totalPages: number) => {
+    this.chapterInfo = {
+      curPageStart,
+      curPageEnd,
+      totalPages
+    }
   }
 
   setBookData = (book: TBookData) => {
