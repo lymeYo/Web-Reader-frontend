@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from 'react'
+import { useRef, type ChangeEvent, useState, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import AddFileImg from '@/assets/images/add.png'
 import SendImg from '@/assets/images/send.png'
@@ -18,6 +18,8 @@ const FileArea = observer(() => {
   const { isLogin, addBook } = getUserStore()
   const { setBookRef } = getBookStore()
 
+  const [isFormVisible, setFormVisible] = useState(false)
+  
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textInputRef = useRef<HTMLInputElement>(null)
 
@@ -56,6 +58,10 @@ const FileArea = observer(() => {
     fileInputRef.current?.click()
   }
 
+  useEffect(() => {
+    setTimeout(() => setFormVisible(true), 0)
+  }, [])
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.container}>
@@ -63,7 +69,7 @@ const FileArea = observer(() => {
           Добро пожаловать в <span>Web Reader</span>, загрузите книгу или вставьте ссылку на её
           загрузку!
         </p>
-        <form className={styles.form}>
+        <form className={`${styles.form} ${isFormVisible ? styles.form_active : ''}`}>
           <input type='text' className={styles['text-input']} ref={textInputRef} />
           <input
             type='file'

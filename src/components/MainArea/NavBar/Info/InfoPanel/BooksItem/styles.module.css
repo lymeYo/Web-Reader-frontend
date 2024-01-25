@@ -8,17 +8,20 @@
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  /* text-overflow: ellipsis; */
+  width: 170px;
 }
 .title input {
  background-color: transparent;
  color: #fff;
- cursor: pointer; 
- width: 100%;
- max-width: 170px;
- white-space: nowrap;
+ cursor: pointer;
+ /* position: absolute;  */
+ width: 300px;
+ /* max-width: 1000%; */
+ /* max-width: 170px; */
+ /* white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; */
 }
 .title input:hover, .item.active input {
   color: rgb(158, 158, 158);
@@ -26,6 +29,18 @@
 .title.edit-mode input {
   cursor: text;
 }
+
+.marquee {
+  animation: marquee 15s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-100%, 0); }
+}
+
+
+
 .buttons {
   display: flex;
 }

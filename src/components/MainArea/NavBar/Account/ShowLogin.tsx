@@ -30,7 +30,7 @@ const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
     setAuthType('register')
   }
 
-  const handleAuth = useCallback(async () => {
+  const handleAuth = async () => {
     const name = nameInputRef.current?.value
     const password = passwordInputRef.current?.value
     if (!name || !password) return
@@ -48,7 +48,7 @@ const ShowLogin = observer(({ closePanel, isOpen }: ShowLoginProps) => {
       setErrMessage('')
       closePanel()
     }
-  }, [authType])
+  }
 
   useMemo(() => {
     isOpenRef.current = isOpen

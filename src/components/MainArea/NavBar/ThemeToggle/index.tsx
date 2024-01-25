@@ -11,13 +11,14 @@ import { useCallback } from 'react'
 const ThemeToggle = observer(() => {
   const { theme, setTheme } = getUIStore()
 
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
+    
     const newTheme: Ttheme = theme == 'light' ? 'dark' : 'light'
-
+    
     Cookies.set(themeCookieKey, newTheme)
-
+    
     setTheme(newTheme)
-  }, [theme])
+  }
 
   return (
     <Button

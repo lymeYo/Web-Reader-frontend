@@ -59,14 +59,11 @@ const NavBar = observer(({ isOpen, handleOpen }: NavBarProps) => {
     handlePanel(EpanelIds.confirmWindow, isPanelOpen)
   }
 
-  const handlePanel = useCallback(
-    (panel: EpanelIds | null, isPanelOpen?: boolean) => {
-      if (isPanelOpen) setCurOpenedPanel(panel)
-      else if (isPanelOpen == false) setCurOpenedPanel(null)
-      else setCurOpenedPanel(curOpenedPanel == panel ? null : panel)
-    },
-    [curOpenedPanel]
-  )
+  const handlePanel = (panel: EpanelIds | null, isPanelOpen?: boolean) => {
+    if (isPanelOpen) setCurOpenedPanel(panel)
+    else if (isPanelOpen == false) setCurOpenedPanel(null)
+    else setCurOpenedPanel(curOpenedPanel == panel ? null : panel)
+  }
 
   const handleIndicatorHover = () => {
     const curTime = new Date().getTime()

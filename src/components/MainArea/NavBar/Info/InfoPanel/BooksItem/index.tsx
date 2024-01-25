@@ -5,7 +5,18 @@ import { observer } from 'mobx-react-lite'
 import { getUserStore } from '@/store'
 
 import styles from './styles.module.css'
-import { useCallback, useRef, useState } from 'react'
+import { createElement, useCallback, useEffect, useRef, useState } from 'react'
+
+const calculateInputWidth = (title: string) => {
+  const div = document.createElement('span')
+  document.body.appendChild(div)
+  div.style.position = 'absolute'
+  div.style.fontSize = '14px'
+  div.innerText = title
+  const width = div.offsetWidth + 'px'
+  div.remove()
+  return width
+}
 
 type BooksItemProps = {
   title: string
@@ -18,6 +29,8 @@ type BooksItemProps = {
 const BooksItem = observer(({ title, ind, bookId, closeHandler, handleDelete }: BooksItemProps) => {
   const { updateBookName } = getUserStore()
   const inputValueRef = useRef<HTMLInputElement>(null)
+  const inputWrapperRef = useRef<HTMLButtonElement>(null)
+  const [isTitleExtraClass, setTitleExtraClass] = useState(false)
   const [isEditMode, setEditMode] = useState(false)
   const handleEdit = (isEdit: boolean) => {
     if (isEdit) {
@@ -31,22 +44,44 @@ const BooksItem = observer(({ title, ind, bookId, closeHandler, handleDelete }: 
   }
 
   const { openedBookId, openBook } = getUserStore()
-  const handleOpenBook = useCallback(async () => {
+  const handleOpenBook = async () => {
     if (isEditMode) return
 
     await openBook(bookId)
     closeHandler()
-  }, [isEditMode])
+  }
 
   const handleDeleteBook = async () => {
     handleDelete(bookId, title)
   }
+
+  const titleMouseOver = () => {
+    console.log(
+      'er',
+      inputValueRef.current?.style.width.replace('px', ''),
+      inputWrapperRef.current?.offsetWidth
+    )
+
+    if (
+      ((inputValueRef.current && +inputValueRef.current.style.width.replace('px', '')) || 0) >
+      (inputWrapperRef.current?.offsetWidth || 0)
+    )
+      setTitleExtraClass(true)
+  }
+  const titleMouseOut = () => {
+    setTitleExtraClass(false)
+  }
+
+  useEffect(() => {
+    if (inputValueRef.current) inputValueRef.current.style.width = calculateInputWidth(title)
+  }, [title])
 
   return (
     <li className={`${styles.item} ${openedBookId == bookId ? styles.active : ''}`}>
       <button
         className={`${styles.title} ${isEditMode ? styles['edit-mode'] : ''}`}
         onClick={handleOpenBook}
+        ref={inputWrapperRef}
       >
         <input
           type='text'
@@ -54,6 +89,9 @@ const BooksItem = observer(({ title, ind, bookId, closeHandler, handleDelete }: 
           defaultValue={title}
           ref={inputValueRef}
           autoFocus={isEditMode}
+          onMouseOver={titleMouseOver}
+          onMouseOut={titleMouseOut}
+          className={isTitleExtraClass ? styles.marquee : ''}
         />
       </button>
       <div className={styles.buttons}>
@@ -91,9 +129,9 @@ type SvgEditProps = {
   handleEdit: (isEdit: boolean) => void
 }
 const SvgEdit = ({ isEdit, handleEdit }: SvgEditProps) => {
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     handleEdit(isEdit)
-  }, [isEdit])
+  }
 
   return (
     <button className={styles.wrapper} onClick={handleClick}>
